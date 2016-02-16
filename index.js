@@ -57,6 +57,7 @@ function render()
                 <dt>&lt;Right&gt;</dt>      <dd>: Next slide</dd>
                 <dt>w</dt>                  <dd>: Toggle aspect ratio (16:9/3:4)</dd>
                 <dt>v</dt>                  <dd>: Toggle view (slides/list)</dd>
+                <dt>r</dt>                  <dd>: Reload (when auto-reload is disabled)</dd>
                 <dt>h <span style="color: #fff">or</span> ?</dt>             <dd>: Toggle help</dd>
             </dl>`;
         var div = e("div", {html: keyboardShortcuts, fontFamily: "arial, sans-serif", fontSize: 13,
@@ -91,6 +92,7 @@ function render()
     body.onkeydown = function (evt) {
         if (evt.keyCode == 37)          state.currentSlide--;
         else if (evt.keyCode == 39)     state.currentSlide++;
+        else return;
         render();
     };
     body.onkeypress = function (evt) {
@@ -98,6 +100,7 @@ function render()
         if (s == "w")                   state.aspectRatio = state.aspectRatio > 14/9 ? 12/9 : 16/9;
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
+        else if (s != "r")              return;
         render();
     }
 }
@@ -160,6 +163,29 @@ function image(div, arg)
         textShadow: "0px 0px 20px #000"} ));
 }
 
+function youtube(div, arg)
+{
+    div.style.backgroundColor = "#000";
+    div.appendChild(e("img", baseStyle, {
+        attributes: {src: `http://img.youtube.com/vi/${arg.id}/0.jpg`}
+    }));
+    var playButton = div.appendChild(e("div", baseStyle, {height: 72, width: 72, left: "50%",
+        top: "50%", marginLeft: -36, marginTop: -36,
+        backgroundImage: "url('http://i.imgur.com/TxzC70f.png')",
+        backgroundRepeat: "no-repeat"}));
+    var title = div.appendChild( e("div", baseStyle, {fontSize: "1em",
+        top: "90%", textAlign: "center", text: arg.title || "", color: "#fff",
+        textShadow: "0px 0px 20px #000"} ));
+
+    div.onclick = function() {
+        var player = e("object", baseStyle, {attributes: {data:
+            `http://www.youtube.com/embed/${arg.id}?autoplay=1&showinfo=0&controls=0`}});
+        div.replaceChild(player, playButton);
+        div.removeChild(title);
+        state.canReload = false;
+    };
+}
+
 function video(div, arg)
 {
     div.style.backgroundColor = "#000";
@@ -202,7 +228,7 @@ var slides = [
         <li>Video (local or youtube)</li>
         <li>Canvas (2D and 3D graphics)</li>`},
     {template: image, title: "Image Slide (courtesy of Unsplash)", url: "https://images.unsplash.com/photo-1414115880398-afebc3d95efc?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600"},
-    {template: video, title: "Video", url: "http://www.youtube.com/embed/PUv66718DII"},
+    {template: youtube, title: "YouTube", id: "PUv66718DII"},
     {template: canvas, render: ctx => {
         ctx.strokeStyle = "1px #000";
         ctx.fillStyle = "#ff0";
