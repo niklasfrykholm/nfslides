@@ -171,8 +171,8 @@ function youtube(div, arg)
     }));
     var playButton = div.appendChild(e("div", baseStyle, {height: 72, width: 72, left: "50%",
         top: "50%", marginLeft: -36, marginTop: -36,
-        backgroundImage: "url('http://i.imgur.com/TxzC70f.png')",
-        backgroundRepeat: "no-repeat"}));
+        backgroundImage: "url('https://www.youtube.com/yt/brand/media/image/YouTube-icon-full_color.png')",
+        backgroundRepeat: "no-repeat", backgroundSize: "contain", backgroundPosition: "center"}));
     var title = div.appendChild( e("div", baseStyle, {fontSize: "1em",
         top: "90%", textAlign: "center", text: arg.title || "", color: "#fff",
         textShadow: "0px 0px 20px #000"} ));
