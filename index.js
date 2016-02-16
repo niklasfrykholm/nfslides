@@ -2,7 +2,7 @@ window.state = window.state || {};
 state.aspectRatio = state.aspectRatio || (16/9);
 state.currentSlide = state.currentSlide || 0;
 state.view = state.view || "slide";
-state.isPlaying = typeof state.isPlaying == "undefined" ? false : state.isPlaying;
+state.isPlaying = typeof state.isPlaying == "undefined" ? true : state.isPlaying;
 
 // Applies the `style` object to the DOM `element`. Special keys:
 // - `text`: Create a text node inside with value text.
