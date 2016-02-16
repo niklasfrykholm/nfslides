@@ -217,8 +217,12 @@ function video(div, arg)
 
 function canvas(div, arg)
 {
-    var canvas = div.appendChild(e("canvas", baseStyle));
+    var sz = [div.style.width, div.style.height].map(e => parseFloat(e));
+    var w = sz[0], h = sz[1];
+    var canvas = div.appendChild(e("canvas", baseStyle, {attributes: {width:w, height:h}}));
     var ctx = canvas.getContext("2d");
+    ctx.translate(w/2, h/2);
+    ctx.scale(h/2000, h/2000);
     arg.render(ctx);
 }
 
@@ -283,10 +287,17 @@ var slides = [
     {template: youtube, title: "YouTube", id: "PUv66718DII"},
     {template: video, title: "MP4", videoSrc: "http://techslides.com/demos/sample-videos/small.mp4", thumbnailSrc: "http://perso.freelug.org/benw/rotor/colour.jpg"},
     {template: canvas, render: ctx => {
-        ctx.strokeStyle = "1px #000";
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth=3;
         ctx.fillStyle = "#ff0";
-        ctx.fillRect(50,50,50,50);
-        ctx.strokeRect(50,50,50,50);
+        var rect = [-800, -800, 1600, 1600];
+        ctx.fillRect(...rect);
+        ctx.strokeRect(...rect);
+        ctx.fillStyle = "#000";
+        ctx.font = "200px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Canvas", 0, 0);
     }},
     {template: title, title: "Good riddance, Powerpoint!"},
 ]
