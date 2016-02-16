@@ -57,7 +57,7 @@ function render()
                 <dt>&lt;Right&gt;</dt>      <dd>: Next slide</dd>
                 <dt>w</dt>                  <dd>: Toggle aspect ratio (16:9/3:4)</dd>
                 <dt>v</dt>                  <dd>: Toggle view (slides/list)</dd>
-                <dt>r</dt>                  <dd>: Reload (when auto-reload is disabled)</dd>
+                <dt>r</dt>                  <dd>: Force reload</dd>
                 <dt>h <span style="color: #fff">or</span> ?</dt>             <dd>: Toggle help</dd>
             </dl>`;
         var div = e("div", {html: keyboardShortcuts, fontFamily: "arial, sans-serif", fontSize: 13,
@@ -111,6 +111,7 @@ function reload()
 
     var script = document.createElement("script");
     script.src = "index.js?" + performance.now();
+    script.charset = "UTF-8";
     var head = document.getElementsByTagName("head")[0];
     head.removeChild(head.appendChild(script));
     render();
@@ -217,13 +218,13 @@ function canvas(div, arg)
 
 var slides = [
     {template: title, title: "nfslides", subtitle: "Niklas Frykholm, 15 Feb 2016"},
-    {title: "nfslides -- Minimalistic Slideshows", html: `
-        <li>~120 lines of JavaScript</li>
-        <li>ES6-ish -- backwards compatibility is boring</li>
+    {title: "nfslides — Minimalistic Slideshows", html: `
+        <li>~120 lines of JavaScript in core</li>
+        <li>ES6 — backwards compatibility is boring</li>
         <li>Hackable: Add your own templates, styles and effects</li>
-        <li>Everything is code</li>
-        <li>Auto-reload, just save in your text editor</li>`},
+        <li>Everything is code</li>`},
     {title: "Features", html: `
+        <li>Auto-reload, just save in your text editor</li>
         <li>Keyboard interface: press <b>h</b> or <b>?</b> for help</li>
         <li>Toggle between 16:9 and 4:3: press <b>w</b></li>
         <li>Toggle between views: press <b>v</b></li>`},
