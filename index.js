@@ -12,11 +12,11 @@ state.isPlaying = typeof state.isPlaying == "undefined" ? true : state.isPlaying
 // - `attributes`: Apply supplied table as node attributes.
 function applyStyle(e, style)
 {
-    for (k in style) {
+    for (let k in style) {
         const v = style[k];
         if (k == "text")        e.appendChild(document.createTextNode(v));
         else if (k == "html")   e.innerHTML = v;
-        else if (k == "attributes") {for (a in v) e[a] = v[a];}
+        else if (k == "attributes") {for (let a in v) e[a] = v[a];}
         else                    e.style[k] = v;
     }
 }
