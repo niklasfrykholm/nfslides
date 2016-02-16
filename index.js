@@ -9,10 +9,11 @@ state.isPlaying = typeof state.isPlaying == "undefined" ? true : state.isPlaying
 // Applies the `style` object to the DOM `element`. Special keys:
 // - `text`: Create a text node inside with value text.
 // - `html`: Use value as innerHTML for node.
+// - `attributes`: Apply supplied table as node attributes.
 function applyStyle(e, style)
 {
     for (k in style) {
-        var v = style[k];
+        const v = style[k];
         if (k == "text")        e.appendChild(document.createTextNode(v));
         else if (k == "html")   e.innerHTML = v;
         else if (k == "attributes") {for (a in v) e[a] = v[a];}
@@ -23,7 +24,7 @@ function applyStyle(e, style)
 // Create a DOM element with style(s) from arguments.
 function e(tag)
 {
-    var e = document.createElement(tag);
+    const e = document.createElement(tag);
     [].forEach.call(arguments, style => applyStyle(e, style));
     return e;
 }
@@ -37,28 +38,28 @@ function isPlaying()
 // Render DOM for current state.
 function render()
 {
-    var body = document.getElementsByTagName("body")[0];
+    const body = document.getElementsByTagName("body")[0];
     applyStyle(body, {margin: "0px", padding: "0px", backgroundColor: "#ccc"});
     while (body.lastChild) body.removeChild(body.lastChild);
 
-    var addDiv = function(body, arg)
+    const addDiv = function(body, arg)
     {
         return body.appendChild( e("div", {backgroundColor: "#fff", position: "absolute",
             overflow: "hidden", fontSize: arg.width/30}, arg) );
     };
 
-    var centerDiv = function(body)
+    const centerDiv = function(body)
     {
-        var r = state.aspectRatio;
-        var win = {w: window.innerWidth, h: window.innerHeight};
-        var sz = win.w / r > win.h ? {w: win.h * r, h: win.h} : {w: win.w, h: win.w / r};
+        const r = state.aspectRatio;
+        const win = {w: window.innerWidth, h: window.innerHeight};
+        const sz = win.w / r > win.h ? {w: win.h * r, h: win.h} : {w: win.w, h: win.w / r};
         return addDiv(body, {height: sz.h, width: sz.w, top: (win.h - sz.h)/2, left: (win.w - sz.w)/2});
     };
 
-    var showHelp = function(body)
+    const showHelp = function(body)
     {
-        var w = window.innerWidth;
-        var keyboardShortcuts =
+        const w = window.innerWidth;
+        const keyboardShortcuts =
             `<h1>Keyboard Shortcuts</h1>
 
             <dl>
@@ -70,7 +71,7 @@ function render()
                 <dt>r</dt>                  <dd>: Force reload</dd>
                 <dt>h <span style="color: #fff">or</span> ?</dt>             <dd>: Toggle help</dd>
             </dl>`;
-        var div = e("div", {html: keyboardShortcuts, fontFamily: "arial, sans-serif", fontSize: 13,
+        const div = e("div", {html: keyboardShortcuts, fontFamily: "arial, sans-serif", fontSize: 13,
             width: 300, left: w-400, top: 50, backgroundColor: "#000", color: "#fff", padding: 20,
             opacity: 0.8, borderRadius: "10px", position: "fixed"});
         [].forEach.call(div.getElementsByTagName("h1"), e => applyStyle(e, {marginBottom: "1em",
@@ -86,11 +87,11 @@ function render()
     state.currentSlide = Math.max(0, Math.min(state.currentSlide, slides.length-1));
 
     if (state.view == "list") {
-        var root = e("div", {});
-        var sz = {w: 300 * state.aspectRatio, h: 300};
-        var x = 0, y = 0;
+        const root = e("div", {});
+        const sz = {w: 300 * state.aspectRatio, h: 300};
+        let x = 0, y = 0;
         for (let i=0; i<slides.length; ++i) {
-            var div = addDiv(root, {left: x, top: y, width: sz.w, height: sz.h});
+            const div = addDiv(root, {left: x, top: y, width: sz.w, height: sz.h});
             (slides[i].template || defaultTemplate)(div, slides[i]);
             x += sz.w + 10;
             if (x + sz.w + 10 > window.innerWidth)
@@ -114,7 +115,7 @@ function render()
         render();
     };
     body.onkeypress = function (evt) {
-        var s = String.fromCharCode(evt.keyCode)
+        const s = String.fromCharCode(evt.keyCode)
         if (s == "w")                   state.aspectRatio = state.aspectRatio > 14/9 ? 12/9 : 16/9;
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
@@ -126,10 +127,10 @@ function render()
 
 function require(src)
 {
-    var script = document.createElement("script");
+    const script = document.createElement("script");
     script.src = `${src}?${performance.now()}`;
     script.charset = "UTF-8";
-    var head = document.getElementsByTagName("head")[0];
+    const head = document.getElementsByTagName("head")[0];
     head.removeChild(head.appendChild(script));
 }
 
@@ -161,7 +162,7 @@ function defaultTemplate(div, arg)
     div.appendChild( e("div", baseStyle, {fontSize: "1.5em",
         top: "10%", textAlign: "center", text: arg.title} ));
 
-    var c = e("div", baseStyle, {padding: "2%", width: "90%", top: "17%"});
+    const c = e("div", baseStyle, {padding: "2%", width: "90%", top: "17%"});
     c.appendChild( e("ul", {html: arg.html}) );
     div.appendChild(c);
 
@@ -195,7 +196,7 @@ function videoBase(div, arg)
     div.style.backgroundColor = "#000";
 
     if (isPlaying()) {
-        var player = arg.playerType == "object"
+        const player = arg.playerType == "object"
             ? e("object", baseStyle, {attributes: {data: arg.videoSrc}})
             : e("video", baseStyle, {attributes: {src: arg.videoSrc, autoplay: true, loop: true}}) ;
         div.appendChild(player);
@@ -224,16 +225,16 @@ function video(div, arg)
 
 function canvas(div, arg)
 {
-    var sz = [div.style.width, div.style.height].map(e => parseFloat(e));
-    var w = sz[0], h = sz[1];
-    var canvas = div.appendChild(e("canvas", baseStyle, {attributes: {width:w, height:h}}));
-    var ctx = canvas.getContext("2d");
+    const sz = [div.style.width, div.style.height].map(e => parseFloat(e));
+    const w = sz[0], h = sz[1];
+    const canvas = div.appendChild(e("canvas", baseStyle, {attributes: {width:w, height:h}}));
+    const ctx = canvas.getContext("2d");
     ctx.translate(w/2, h/2);
     ctx.scale(h/2000, h/2000);
     arg.render(ctx, 0);
     if (isPlaying() && arg.animation) {
-        var start = Date.now();
-        var animate = function() {
+        const start = Date.now();
+        const animate = function() {
             if (document.getElementsByTagName("canvas")[0] != canvas) return;
             arg.render(ctx, (Date.now() - start)/1000.0);
             window.requestAnimationFrame(animate);
@@ -245,10 +246,10 @@ function canvas(div, arg)
 
 function markdown(div, arg)
 {
-    var unindent = function(s) {
+    const unindent = function(s) {
         s = s.replace(/^\s*\n/, ""); // Remove initial space
-        var indent = s.match(/^\s*/)[0];
-        var matchIndent = new RegExp(`^${indent}`, "mg");
+        const indent = s.match(/^\s*/)[0];
+        const matchIndent = new RegExp(`^${indent}`, "mg");
         s = s.replace(matchIndent, "");
         return s;
     };
@@ -259,7 +260,7 @@ function markdown(div, arg)
         return;
     }
 
-    var html = marked(unindent(arg.markdown));
+    const html = marked(unindent(arg.markdown));
 
     div.appendChild( e("div", baseStyle, {left: "5%", width: "90%", top: "10%",
         html: html}) );
@@ -309,7 +310,7 @@ var slides = [
             ctx.strokeStyle = "#000";
             ctx.lineWidth=3;
             ctx.fillStyle = "#ff0";
-            var rect = [-800, -800, 1600, 1600];
+            const rect = [-800, -800, 1600, 1600];
             ctx.fillRect(...rect);
             ctx.strokeRect(...rect);
             ctx.fillStyle = "#000";
