@@ -176,8 +176,7 @@ function addElements(div, arg)
         const ctx = canvas.getContext("2d");
         ctx.translate(w/2, h/2);
         ctx.scale(h/2000, h/2000);
-        const animate = arg.canvas(ctx, 0);
-        if (isPlaying() && animate) {
+        if (arg.canvas(ctx, 0) == "animate" && isPlaying()) {
             const start = Date.now();
             const animate = function() {
                 if (document.getElementsByTagName("canvas")[0] != canvas) return;
@@ -228,8 +227,7 @@ function addElements(div, arg)
             textShadow: "0px 0px 20px #000"} ));
 
     [].forEach.call(div.getElementsByTagName("h1"), e => applyStyle(e, {
-        textAlign: "center", fontSize: "1.5em", marginTop: 0, fontWeight: "normal"
-    }));
+        textAlign: "center", fontSize: "1.5em", marginTop: 0, fontWeight: "normal"}));
     [].forEach.call(div.getElementsByTagName("li"), e => applyStyle(e, {marginBottom: "0.4em"}));
 }
 
@@ -273,7 +271,7 @@ var slides = [
     {caption: "Image Slide (courtesy of Unsplash)", imageUrl: "https://images.unsplash.com/photo-1414115880398-afebc3d95efc?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600"},
     {caption: "YouTube", video: {youtubeId: "PUv66718DII"}},
     {caption: "MP4", video: {src: "http://techslides.com/demos/sample-videos/small.mp4", thumbnailSrc: "http://perso.freelug.org/benw/rotor/colour.jpg"}},
-    {canvas: (ctx,t) => {
+    {caption: "Canvas", canvas: (ctx,t) => {
         ctx.save();
             ctx.clearRect(-2000,-2000,4000,4000);
             ctx.rotate(t);
@@ -283,13 +281,8 @@ var slides = [
             const rect = [-800, -800, 1600, 1600];
             ctx.fillRect(...rect);
             ctx.strokeRect(...rect);
-            ctx.fillStyle = "#000";
-            ctx.font = "200px arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("Canvas", 0, 0);
         ctx.restore();
-        return true;
+        return "animate";
     }},
-    {title: "Good riddance, Powerpoint!"},
+    {title: "Good riddance, Powerpoint!", subtitle: "TTYN"},
 ]
