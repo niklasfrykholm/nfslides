@@ -164,12 +164,14 @@ function image(div, arg)
         textShadow: "0px 0px 20px #000"} ));
 }
 
-function youtube(div, arg)
+function videoBase(div, arg)
 {
     div.style.backgroundColor = "#000";
-    div.appendChild(e("img", baseStyle, {
-        attributes: {src: `http://img.youtube.com/vi/${arg.id}/0.jpg`}
-    }));
+    if (arg.thumbnailSrc)
+        div.appendChild( e("div", baseStyle, {width: "100%", height: "100%",
+        backgroundImage: `url('${arg.thumbnailSrc}')`, backgroundSize: "contain",
+        backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
+
     var playButton = div.appendChild(e("div", baseStyle, {height: 72, width: 72, left: "50%",
         top: "50%", marginLeft: -36, marginTop: -36,
         backgroundImage: "url('https://www.youtube.com/yt/brand/media/image/YouTube-icon-full_color.png')",
@@ -179,8 +181,9 @@ function youtube(div, arg)
         textShadow: "0px 0px 20px #000"} ));
 
     div.onclick = function() {
-        var player = e("object", baseStyle, {attributes: {data:
-            `http://www.youtube.com/embed/${arg.id}?autoplay=1&showinfo=0&controls=0`}});
+        var player = arg.playerType == "object"
+            ? e("object", baseStyle, {attributes: {data: arg.videoSrc}})
+            : e("video", baseStyle, {attributes: {src: arg.videoSrc, autoplay: true, loop: true}}) ;
         player.onkeydown = function (evt) {
             if (evt.keyCode == 37)          state.currentSlide--;
             else if (evt.keyCode == 39)     state.currentSlide++;
@@ -189,20 +192,20 @@ function youtube(div, arg)
         };
         div.replaceChild(player, playButton);
         div.removeChild(title);
+        div.onclick = null;
         state.canReload = false;
     };
 }
 
+function youtube(div, arg)
+{
+    videoBase(div, {thumbnailSrc: `http://img.youtube.com/vi/${arg.id}/0.jpg`, title: arg.title,
+        playerType: "object", videoSrc: `http://www.youtube.com/embed/${arg.id}?autoplay=1&showinfo=0&controls=0`});
+}
+
 function video(div, arg)
 {
-    div.style.backgroundColor = "#000";
-    if (arg.url) div.appendChild( e("object", baseStyle, {attributes: {data: arg.url}}) );
-    if (arg.src) div.appendChild( e("video", baseStyle, {attributes: {src: arg.src, autoplay: true, loop: true}}) );
-    div.appendChild( e("div", baseStyle, {fontSize: "1em",
-        top: "90%", textAlign: "center", text: arg.title || "", color: "#fff",
-        textShadow: "0px 0px 20px #000"} ));
-    // Auto-reload causes flickering in videos
-    state.canReload = false;
+    videoBase(div, arg);
 }
 
 function canvas(div, arg)
@@ -236,6 +239,7 @@ var slides = [
         <li>Canvas (2D and 3D graphics)</li>`},
     {template: image, title: "Image Slide (courtesy of Unsplash)", url: "https://images.unsplash.com/photo-1414115880398-afebc3d95efc?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600"},
     {template: youtube, title: "YouTube", id: "PUv66718DII"},
+    {template: video, title: "MP4", videoSrc: "http://techslides.com/demos/sample-videos/small.mp4", thumbnailSrc: "http://perso.freelug.org/benw/rotor/colour.jpg"},
     {template: canvas, render: ctx => {
         ctx.strokeStyle = "1px #000";
         ctx.fillStyle = "#ff0";
