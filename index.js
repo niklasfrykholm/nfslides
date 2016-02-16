@@ -144,115 +144,88 @@ if (window.location.href.startsWith("file://"))
 // Slide templates
 // ------------------------------------------------------------
 
-var baseStyle = {position: "absolute", overflow: "hidden",width: "100%", height: "100%"};
+var baseStyle = {position: "absolute", overflow: "hidden", width: "100%", height: "100%"};
 
-function defaultTemplate(div, arg)
+function addElements(div, arg)
 {
-    div.appendChild( e("div", baseStyle, {fontSize: "1.5em",
-        top: "10%", textAlign: "center", text: arg.title} ));
-
-    const c = e("div", baseStyle, {padding: "2%", width: "90%", top: "17%"});
-    c.appendChild( e("ul", {html: arg.html}) );
-    div.appendChild(c);
-
-    [].forEach.call(div.getElementsByTagName("li"), e => applyStyle(e, {marginBottom: "0.4em"}));
-}
-
-function title(div, arg)
-{
-    div.appendChild( e("div", baseStyle, {fontSize: "2em",
-        top: "40%", textAlign: "center", text: arg.title}) );
-    if (arg.subtitle) {
+    if (arg.imageUrl)
+        div.appendChild( e("div", baseStyle, {width: "100%", height: "100%",
+            backgroundImage: `url('${arg.imageUrl}')`, backgroundSize: "contain",
+            backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
+    if (arg.video) {
+        const video = arg.video;
+        if (isPlaying()) {
+            const player = video.youtubeId
+                ? e("object", baseStyle, {attributes: {data: `http://www.youtube.com/embed/${video.youtubeId}?autoplay=1&showinfo=0&controls=0`}})
+                : e("video", baseStyle, {attributes: {src: video.src, autoplay: true, loop: true}}) ;
+            div.appendChild(player);
+            state.canReload = false;
+        } else {
+            if (video.youtubeId && !video.thumbnailSrc)
+                video.thumbnailSrc = `http://img.youtube.com/vi/${video.youtubeId}/0.jpg`;
+            if (video.thumbnailSrc)
+                div.appendChild( e("div", baseStyle, {
+                    backgroundImage: `url('${video.thumbnailSrc}')`, backgroundSize: "contain",
+                    backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
+        }
+    }
+    if (arg.canvas) {
+        const sz = [div.style.width, div.style.height].map(e => parseFloat(e));
+        const w = sz[0], h = sz[1];
+        const canvas = div.appendChild(e("canvas", baseStyle, {attributes: {width:w, height:h}}));
+        const ctx = canvas.getContext("2d");
+        ctx.translate(w/2, h/2);
+        ctx.scale(h/2000, h/2000);
+        const animate = arg.canvas(ctx, 0);
+        if (isPlaying() && animate) {
+            const start = Date.now();
+            const animate = function() {
+                if (document.getElementsByTagName("canvas")[0] != canvas) return;
+                arg.canvas(ctx, (Date.now() - start)/1000.0);
+                window.requestAnimationFrame(animate);
+            };
+            window.requestAnimationFrame(animate);
+            state.canReload = false;
+        }
+    }
+    if (arg.title)
+        div.appendChild( e("div", baseStyle, {fontSize: "2em",
+            top: "40%", textAlign: "center", text: arg.title}) );
+    if (arg.subtitle)
         div.appendChild( e("div", baseStyle, {fontSize: "1em",
             top: "60%", textAlign: "center", text: arg.subtitle}) );
+    if (arg.h1)
+        div.appendChild( e("div", baseStyle, {fontSize: "1.5em",
+            top: "10%", textAlign: "center", text: arg.h1} ));
+    if (arg.ul) {
+        const c = e("div", baseStyle, {left: "5%", width: "90%", top: "20%"});
+        c.appendChild( e("ul", {html: arg.ul}) );
+        div.appendChild(c);
     }
-}
-
-function image(div, arg)
-{
-    div.style.backgroundColor = "#000";
-    if (arg.url)
-        div.appendChild( e("div", baseStyle, {width: "100%", height: "100%",
-            backgroundImage: `url('${arg.url}')`, backgroundSize: "contain",
-            backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
-    div.appendChild( e("div", baseStyle, {fontSize: "1em",
-        top: "90%", textAlign: "center", text: arg.title || "", color: "#fff",
-        textShadow: "0px 0px 20px #000"} ));
-}
-
-function videoBase(div, arg)
-{
-    div.style.backgroundColor = "#000";
-
-    if (isPlaying()) {
-        const player = arg.playerType == "object"
-            ? e("object", baseStyle, {attributes: {data: arg.videoSrc}})
-            : e("video", baseStyle, {attributes: {src: arg.videoSrc, autoplay: true, loop: true}}) ;
-        div.appendChild(player);
-        state.canReload = false;
-    } else {
-        if (arg.thumbnailSrc)
-            div.appendChild( e("div", baseStyle, {width: "100%", height: "100%",
-            backgroundImage: `url('${arg.thumbnailSrc}')`, backgroundSize: "contain",
-            backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
-        div.appendChild( e("div", baseStyle, {fontSize: "1em",
-            top: "90%", textAlign: "center", text: arg.title || "", color: "#fff",
-            textShadow: "0px 0px 20px #000"} ));
-    }
-}
-
-function youtube(div, arg)
-{
-    videoBase(div, {thumbnailSrc: `http://img.youtube.com/vi/${arg.id}/0.jpg`, title: arg.title,
-        playerType: "object", videoSrc: `http://www.youtube.com/embed/${arg.id}?autoplay=1&showinfo=0&controls=0`});
-}
-
-function video(div, arg)
-{
-    videoBase(div, arg);
-}
-
-function canvas(div, arg)
-{
-    const sz = [div.style.width, div.style.height].map(e => parseFloat(e));
-    const w = sz[0], h = sz[1];
-    const canvas = div.appendChild(e("canvas", baseStyle, {attributes: {width:w, height:h}}));
-    const ctx = canvas.getContext("2d");
-    ctx.translate(w/2, h/2);
-    ctx.scale(h/2000, h/2000);
-    arg.render(ctx, 0);
-    if (isPlaying() && arg.animation) {
-        const start = Date.now();
-        const animate = function() {
-            if (document.getElementsByTagName("canvas")[0] != canvas) return;
-            arg.render(ctx, (Date.now() - start)/1000.0);
-            window.requestAnimationFrame(animate);
+    if (arg.markdown) {
+        const unindent = function(s) {
+            s = s.replace(/^\s*\n/, ""); // Remove initial space
+            const indent = s.match(/^\s*/)[0];
+            const matchIndent = new RegExp(`^${indent}`, "mg");
+            s = s.replace(matchIndent, "");
+            return s;
         };
-        window.requestAnimationFrame(animate);
-        state.canReload = false;
+
+        if (typeof marked === "undefined") {
+            require("marked.min.js");
+            window.setTimeout(render, 50);
+            return;
+        }
+
+        arg.html = marked(unindent(arg.markdown));
     }
-}
+    if (arg.html)
+        div.appendChild( e("div", baseStyle, {left: "5%", width: "90%", top: "10%", html: arg.html}) );
 
-function markdown(div, arg)
-{
-    const unindent = function(s) {
-        s = s.replace(/^\s*\n/, ""); // Remove initial space
-        const indent = s.match(/^\s*/)[0];
-        const matchIndent = new RegExp(`^${indent}`, "mg");
-        s = s.replace(matchIndent, "");
-        return s;
-    };
-
-    if (typeof marked === "undefined") {
-        require("marked.min.js");
-        window.setTimeout(render, 50);
-        return;
-    }
-
-    const html = marked(unindent(arg.markdown));
-
-    div.appendChild( e("div", baseStyle, {left: "5%", width: "90%", top: "10%",
-        html: html}) );
+    if (arg.caption)
+        div.appendChild( e("div", baseStyle, {fontSize: "1em",
+            top: "90%", textAlign: "center", text: arg.caption, color: "#fff",
+            textShadow: "0px 0px 20px #000"} ));
 
     [].forEach.call(div.getElementsByTagName("h1"), e => applyStyle(e, {
         textAlign: "center", fontSize: "1.5em", marginTop: 0, fontWeight: "normal"
@@ -260,39 +233,47 @@ function markdown(div, arg)
     [].forEach.call(div.getElementsByTagName("li"), e => applyStyle(e, {marginBottom: "0.4em"}));
 }
 
+function defaultTemplate(div, arg)
+{
+    addElements(div, arg);
+}
+
 // ------------------------------------------------------------
 // Slides
 // ------------------------------------------------------------
 
 var slides = [
-    {template: title, title: "nfslides", subtitle: "Niklas Frykholm, 15 Feb 2016"},
-    {title: "nfslides — Minimalistic Slideshows", html: `
-        <li>~140 lines of JavaScript in core</li>
-        <li>ES6 — backwards compatibility is boring</li>
-        <li>Hackable: Add your own templates, styles and effects</li>
-        <li>Everything is code</li>`},
-    {title: "Features", html: `
+    {title: "nfslides", subtitle: "Niklas Frykholm, 15 Feb 2016"},
+    {html: `
+        <h1>nfslides — Minimalistic Slideshows</h1>
+        <ul>
+            <li>~140 lines of JavaScript in core</li>
+            <li>ES6 — backwards compatibility is boring</li>
+            <li>Hackable: Add your own templates, styles and effects</li>
+            <li>Everything is code</li>
+        </ul>`},
+    {h1: "Features", ul: `
         <li>Auto-reload, just save in your text editor</li>
         <li>Keyboard interface: press <b>h</b> or <b>?</b> for help</li>
         <li>Toggle between 16:9 and 4:3: press <b>w</b></li>
         <li>Toggle between views: press <b>v</b></li>`},
-    {title: "Built-In Templates", html: `
+    {h1: "Built-In Templates", ul: `
         <li>Title</li>
         <li>List</li>
         <li>Markdown</li>
         <li>Image</li>
         <li>Video (local or youtube)</li>
         <li>Canvas (2D and 3D graphics)</li>`},
-    {template: markdown, markdown: `
+    {markdown: `
         # Markdown
 
         * You can make slides in [markdown](https://daringfireball.net/projects/markdown/)
         * Uses \`marked.min.js\` as markdown processor
     `},
-    {template: image, title: "Image Slide (courtesy of Unsplash)", url: "https://images.unsplash.com/photo-1414115880398-afebc3d95efc?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600"},
-    {template: youtube, title: "YouTube", id: "PUv66718DII"},
-    {template: video, title: "MP4", videoSrc: "http://techslides.com/demos/sample-videos/small.mp4", thumbnailSrc: "http://perso.freelug.org/benw/rotor/colour.jpg"},
-    {template: canvas, animation: true, render: (ctx,t) => {
+    {caption: "Image Slide (courtesy of Unsplash)", imageUrl: "https://images.unsplash.com/photo-1414115880398-afebc3d95efc?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600"},
+    {caption: "YouTube", video: {youtubeId: "PUv66718DII"}},
+    {caption: "MP4", video: {src: "http://techslides.com/demos/sample-videos/small.mp4", thumbnailSrc: "http://perso.freelug.org/benw/rotor/colour.jpg"}},
+    {canvas: (ctx,t) => {
         ctx.save();
             ctx.clearRect(-2000,-2000,4000,4000);
             ctx.rotate(t);
@@ -308,6 +289,7 @@ var slides = [
             ctx.textBaseline = "middle";
             ctx.fillText("Canvas", 0, 0);
         ctx.restore();
+        return true;
     }},
-    {template: title, title: "Good riddance, Powerpoint!"},
+    {title: "Good riddance, Powerpoint!"},
 ]

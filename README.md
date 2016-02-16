@@ -17,7 +17,7 @@ that you can easily understand and change it, modify the styles, templates,
 add features, etc.
 
 * 140 lines of core code
-* 120 lines of standard slide templates
+* 100 lines of slide templates
 
 Even with this small size there are a number of built-in features:
 
