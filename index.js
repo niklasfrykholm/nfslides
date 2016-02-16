@@ -2,7 +2,7 @@ window.state = window.state || {};
 state.aspectRatio = state.aspectRatio || (16/9);
 state.currentSlide = state.currentSlide || 0;
 state.view = state.view || "slide";
-state.playing = typeof state.playing == "undefined" ? false : state.playing;
+state.isPlaying = typeof state.isPlaying == "undefined" ? false : state.isPlaying;
 
 // Applies the `style` object to the DOM `element`. Special keys:
 // - `text`: Create a text node inside with value text.
@@ -24,6 +24,12 @@ function e(tag)
     var e = document.createElement(tag);
     [].forEach.call(arguments, style => applyStyle(e, style));
     return e;
+}
+
+// Return true if we should play animations
+function isPlaying()
+{
+    return state.isPlaying && state.view == "slide";
 }
 
 // Render DOM for current state.
@@ -56,6 +62,7 @@ function render()
             <dl>
                 <dt>&lt;Left&gt;</dt>       <dd>: Previous slide</dd>
                 <dt>&lt;Right&gt;</dt>      <dd>: Next slide</dd>
+                <dt>&lt;space&gt;</dt>      <dd>: Toggle animations</dd>
                 <dt>w</dt>                  <dd>: Toggle aspect ratio (16:9/3:4)</dd>
                 <dt>v</dt>                  <dd>: Toggle view (slides/list)</dd>
                 <dt>r</dt>                  <dd>: Force reload</dd>
@@ -101,6 +108,7 @@ function render()
         if (s == "w")                   state.aspectRatio = state.aspectRatio > 14/9 ? 12/9 : 16/9;
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
+        else if (s == " ")              state.isPlaying = !state.isPlaying;
         else if (s != "r")              return;
         render();
     }
@@ -175,34 +183,22 @@ function image(div, arg)
 function videoBase(div, arg)
 {
     div.style.backgroundColor = "#000";
-    if (arg.thumbnailSrc)
-        div.appendChild( e("div", baseStyle, {width: "100%", height: "100%",
-        backgroundImage: `url('${arg.thumbnailSrc}')`, backgroundSize: "contain",
-        backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
 
-    var playButton = div.appendChild(e("div", baseStyle, {height: 72, width: 72, left: "50%",
-        top: "50%", marginLeft: -36, marginTop: -36,
-        backgroundImage: "url('https://www.youtube.com/yt/brand/media/image/YouTube-icon-full_color.png')",
-        backgroundRepeat: "no-repeat", backgroundSize: "contain", backgroundPosition: "center"}));
-    var title = div.appendChild( e("div", baseStyle, {fontSize: "1em",
-        top: "90%", textAlign: "center", text: arg.title || "", color: "#fff",
-        textShadow: "0px 0px 20px #000"} ));
-
-    div.onclick = function() {
+    if (isPlaying()) {
         var player = arg.playerType == "object"
             ? e("object", baseStyle, {attributes: {data: arg.videoSrc}})
             : e("video", baseStyle, {attributes: {src: arg.videoSrc, autoplay: true, loop: true}}) ;
-        player.onkeydown = function (evt) {
-            if (evt.keyCode == 37)          state.currentSlide--;
-            else if (evt.keyCode == 39)     state.currentSlide++;
-            else return;
-            render();
-        };
-        div.replaceChild(player, playButton);
-        div.removeChild(title);
-        div.onclick = null;
+        div.appendChild(player);
         state.canReload = false;
-    };
+    } else {
+        if (arg.thumbnailSrc)
+            div.appendChild( e("div", baseStyle, {width: "100%", height: "100%",
+            backgroundImage: `url('${arg.thumbnailSrc}')`, backgroundSize: "contain",
+            backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
+        div.appendChild( e("div", baseStyle, {fontSize: "1em",
+            top: "90%", textAlign: "center", text: arg.title || "", color: "#fff",
+            textShadow: "0px 0px 20px #000"} ));
+    }
 }
 
 function youtube(div, arg)
@@ -225,27 +221,16 @@ function canvas(div, arg)
     ctx.translate(w/2, h/2);
     ctx.scale(h/2000, h/2000);
     arg.render(ctx, 0);
-    if (arg.animation) {
-        div.onclick = function () {
-            state.playing = !state.playing;
-            render();
-        };
-    }
-    if (state.playing) {
+    if (isPlaying() && arg.animation) {
         var start = Date.now();
-        var slide = state.currentSlide;
         var animate = function() {
-            if (slide != state.currentSlide) {
-                state.playing = false;
-                state.canReload = true;
-                return;
-            }
+            if (document.getElementsByTagName("canvas")[0] != canvas) return;
             arg.render(ctx, (Date.now() - start)/1000.0);
             window.requestAnimationFrame(animate);
         };
         window.requestAnimationFrame(animate);
         state.canReload = false;
-    };
+    }
 }
 
 function markdown(div, arg)
