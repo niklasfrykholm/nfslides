@@ -123,7 +123,10 @@ function reload()
 
 window.onload = render;
 if (state.interval) window.clearInterval(state.interval);
-state.interval = window.setInterval(reload, 500);
+
+// Hot reload iff loaded through file:// URL
+if (window.location.href.startsWith("file://"))
+    state.interval = window.setInterval(reload, 500);
 
 // ------------------------------------------------------------
 // Slide templates
@@ -231,7 +234,7 @@ function markdown(div, arg)
 
     if (typeof marked === "undefined") {
         require("marked.min.js");
-        window.setTimeout(reload, 50);
+        window.setTimeout(render, 50);
         return;
     }
 
