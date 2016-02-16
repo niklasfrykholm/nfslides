@@ -180,6 +180,12 @@ function youtube(div, arg)
     div.onclick = function() {
         var player = e("object", baseStyle, {attributes: {data:
             `http://www.youtube.com/embed/${arg.id}?autoplay=1&showinfo=0&controls=0`}});
+        player.onkeydown = function (evt) {
+            if (evt.keyCode == 37)          state.currentSlide--;
+            else if (evt.keyCode == 39)     state.currentSlide++;
+            else return;
+            render();
+        };
         div.replaceChild(player, playButton);
         div.removeChild(title);
         state.canReload = false;
