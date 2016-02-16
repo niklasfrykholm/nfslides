@@ -35,11 +35,12 @@ function isPlaying()
     return state.isPlaying && state.view == "slide";
 }
 
-// Render DOM for current state.
+// Render DOM for current state. This is called every time state changes.
 function render()
 {
     const body = document.getElementsByTagName("body")[0];
-    applyStyle(body, {margin: "0px", padding: "0px", backgroundColor: "#ccc"});
+    applyStyle(body, {margin: "0px", padding: "0px", backgroundColor: "#ccc",
+        fontFamily: "arial, sans-serif"});
     while (body.lastChild) body.removeChild(body.lastChild);
 
     const addDiv = function(body, arg)
@@ -61,7 +62,6 @@ function render()
         const w = window.innerWidth;
         const keyboardShortcuts =
             `<h1>Keyboard Shortcuts</h1>
-
             <dl>
                 <dt>&lt;Left&gt;</dt>       <dd>: Previous slide</dd>
                 <dt>&lt;Right&gt;</dt>      <dd>: Next slide</dd>
@@ -71,7 +71,7 @@ function render()
                 <dt>r</dt>                  <dd>: Force reload</dd>
                 <dt>h <span style="color: #fff">or</span> ?</dt>             <dd>: Toggle help</dd>
             </dl>`;
-        const div = e("div", {html: keyboardShortcuts, fontFamily: "arial, sans-serif", fontSize: 13,
+        const div = e("div", {html: keyboardShortcuts, fontSize: 13,
             width: 300, left: w-400, top: 50, backgroundColor: "#000", color: "#fff", padding: 20,
             opacity: 0.8, borderRadius: "10px", position: "fixed"});
         [].forEach.call(div.getElementsByTagName("h1"), e => applyStyle(e, {marginBottom: "1em",
@@ -83,23 +83,19 @@ function render()
     };
 
     state.canReload = true;
-
     state.currentSlide = Math.max(0, Math.min(state.currentSlide, slides.length-1));
 
     if (state.view == "list") {
         const root = e("div", {});
-        const sz = {w: 300 * state.aspectRatio, h: 300};
+        const w = 300 * state.aspectRatio, h = 300;
         let x = 0, y = 0;
         for (let i=0; i<slides.length; ++i) {
-            const div = addDiv(root, {left: x, top: y, width: sz.w, height: sz.h});
+            const div = addDiv(root, {left: x, top: y, width: w, height: h});
             (slides[i].template || defaultTemplate)(div, slides[i]);
-            x += sz.w + 10;
-            if (x + sz.w + 10 > window.innerWidth)
-                {x=0; y += sz.h + 10;}
-            div.onmousedown = () => {
-                state.currentSlide = i;
-                state.view = "slide";
-            }
+            x += w + 10;
+            if (x + w + 10 > window.innerWidth)
+                {x=0; y += h + 10;}
+            div.onmousedown = () => {state.currentSlide = i; state.view = "slide";};
         }
         body.appendChild(root);
     } else
@@ -127,11 +123,9 @@ function render()
 
 function require(src)
 {
-    const script = document.createElement("script");
-    script.src = `${src}?${performance.now()}`;
-    script.charset = "UTF-8";
     const head = document.getElementsByTagName("head")[0];
-    head.removeChild(head.appendChild(script));
+    head.removeChild(head.appendChild(e("script",
+        {attributes: {src: `${src}?${performance.now()}`, charset: "UTF-8"}})));
 }
 
 function reload()
@@ -143,8 +137,6 @@ function reload()
 
 window.onload = render;
 if (state.interval) window.clearInterval(state.interval);
-
-// Hot reload iff loaded through file:// URL
 if (window.location.href.startsWith("file://"))
     state.interval = window.setInterval(reload, 500);
 
@@ -152,10 +144,7 @@ if (window.location.href.startsWith("file://"))
 // Slide templates
 // ------------------------------------------------------------
 
-var baseStyle = {
-    position: "absolute", overflow: "hidden",
-    width: "100%", height: "100%", fontFamily: "arial, sans-serif"
-};
+var baseStyle = {position: "absolute", overflow: "hidden",width: "100%", height: "100%"};
 
 function defaultTemplate(div, arg)
 {
@@ -278,7 +267,7 @@ function markdown(div, arg)
 var slides = [
     {template: title, title: "nfslides", subtitle: "Niklas Frykholm, 15 Feb 2016"},
     {title: "nfslides — Minimalistic Slideshows", html: `
-        <li>~120 lines of JavaScript in core</li>
+        <li>~140 lines of JavaScript in core</li>
         <li>ES6 — backwards compatibility is boring</li>
         <li>Hackable: Add your own templates, styles and effects</li>
         <li>Everything is code</li>`},
@@ -314,7 +303,7 @@ var slides = [
             ctx.fillRect(...rect);
             ctx.strokeRect(...rect);
             ctx.fillStyle = "#000";
-            ctx.font = "200px Arial";
+            ctx.font = "200px arial";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText("Canvas", 0, 0);
