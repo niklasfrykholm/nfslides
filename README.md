@@ -30,7 +30,7 @@ Even with this small size there are a number of built-in features:
 * Video slides (youtube or MP4)
 * Canvas (with animation)
 
-Try the [sample slideshow]() (not yet available).
+Try the [sample slideshow](http://htmlpreview.github.io/?https://raw.githubusercontent.com/niklasfrykholm/nfslides/master/index.html).
 
 ## Implementation Details
 
