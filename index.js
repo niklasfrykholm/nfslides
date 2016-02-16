@@ -1,3 +1,5 @@
+"use strict";
+
 window.state = window.state || {};
 state.aspectRatio = state.aspectRatio || (16/9);
 state.currentSlide = state.currentSlide || 0;
@@ -86,9 +88,17 @@ function render()
     if (state.view == "list") {
         var root = e("div", {});
         var sz = {w: 300 * state.aspectRatio, h: 300};
-        for (var i=0; i<slides.length; ++i) {
-            var div = addDiv(root, {top: i*(sz.h+10), width: sz.w, height: sz.h});
+        var x = 0, y = 0;
+        for (let i=0; i<slides.length; ++i) {
+            var div = addDiv(root, {left: x, top: y, width: sz.w, height: sz.h});
             (slides[i].template || defaultTemplate)(div, slides[i]);
+            x += sz.w + 10;
+            if (x + sz.w + 10 > window.innerWidth)
+                {x=0; y += sz.h + 10;}
+            div.onmousedown = () => {
+                state.currentSlide = i;
+                state.view = "slide";
+            }
         }
         body.appendChild(root);
     } else
