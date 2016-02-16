@@ -105,15 +105,19 @@ function render()
     }
 }
 
-function reload()
+function require(src)
 {
-    if (!state.canReload) return;
-
     var script = document.createElement("script");
-    script.src = "index.js?" + performance.now();
+    script.src = `${src}?${performance.now()}`;
     script.charset = "UTF-8";
     var head = document.getElementsByTagName("head")[0];
     head.removeChild(head.appendChild(script));
+}
+
+function reload()
+{
+    if (!state.canReload) return;
+    require("index.js");
     render();
 }
 
@@ -215,6 +219,34 @@ function canvas(div, arg)
     arg.render(ctx);
 }
 
+function markdown(div, arg)
+{
+    var unindent = function(s) {
+        s = s.replace(/^\s*\n/, ""); // Remove initial space
+        var indent = s.match(/^\s*/)[0];
+        var matchIndent = new RegExp(`^${indent}`, "mg");
+        s = s.replace(matchIndent, "");
+        return s;
+    };
+
+    if (typeof marked === "undefined") {
+        require("marked.min.js");
+        window.setTimeout(reload, 50);
+        return;
+    }
+
+    var html = marked(unindent(arg.markdown));
+
+    div.appendChild( e("div", baseStyle, {left: "5%", width: "90%", top: "10%",
+        html: html}) );
+
+    [].forEach.call(div.getElementsByTagName("h1"), e => applyStyle(e, {
+        textAlign: "center", fontSize: "1.5em", marginTop: 0, fontWeight: "normal"
+    }));
+    [].forEach.call(div.getElementsByTagName("li"), e => applyStyle(e, {marginBottom: "0.4em"}));
+
+}
+
 // ------------------------------------------------------------
 // Slides
 // ------------------------------------------------------------
@@ -234,9 +266,16 @@ var slides = [
     {title: "Built-In Templates", html: `
         <li>Title</li>
         <li>List</li>
+        <li>Markdown</li>
         <li>Image</li>
         <li>Video (local or youtube)</li>
         <li>Canvas (2D and 3D graphics)</li>`},
+    {template: markdown, markdown: `
+        # Markdown
+
+        * You can make slides in [markdown](https://daringfireball.net/projects/markdown/)
+        * Uses \`marked.min.js\` as markdown processor
+    `},
     {template: image, title: "Image Slide (courtesy of Unsplash)", url: "https://images.unsplash.com/photo-1414115880398-afebc3d95efc?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600"},
     {template: youtube, title: "YouTube", id: "PUv66718DII"},
     {template: video, title: "MP4", videoSrc: "http://techslides.com/demos/sample-videos/small.mp4", thumbnailSrc: "http://perso.freelug.org/benw/rotor/colour.jpg"},
@@ -246,5 +285,5 @@ var slides = [
         ctx.fillRect(50,50,50,50);
         ctx.strokeRect(50,50,50,50);
     }},
-    {template: title, title: "Goodbye Powerpoint!"},
+    {template: title, title: "Good riddance, Powerpoint!"},
 ]
