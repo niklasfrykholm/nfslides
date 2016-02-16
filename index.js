@@ -2,6 +2,7 @@ window.state = window.state || {};
 state.aspectRatio = state.aspectRatio || (16/9);
 state.currentSlide = state.currentSlide || 0;
 state.view = state.view || "slide";
+state.playing = typeof state.playing == "undefined" ? false : state.playing;
 
 // Applies the `style` object to the DOM `element`. Special keys:
 // - `text`: Create a text node inside with value text.
@@ -223,7 +224,28 @@ function canvas(div, arg)
     var ctx = canvas.getContext("2d");
     ctx.translate(w/2, h/2);
     ctx.scale(h/2000, h/2000);
-    arg.render(ctx);
+    arg.render(ctx, 0);
+    if (arg.animation) {
+        div.onclick = function () {
+            state.playing = !state.playing;
+            render();
+        };
+    }
+    if (state.playing) {
+        var start = Date.now();
+        var slide = state.currentSlide;
+        var animate = function() {
+            if (slide != state.currentSlide) {
+                state.playing = false;
+                state.canReload = true;
+                return;
+            }
+            arg.render(ctx, (Date.now() - start)/1000.0);
+            window.requestAnimationFrame(animate);
+        };
+        window.requestAnimationFrame(animate);
+        state.canReload = false;
+    };
 }
 
 function markdown(div, arg)
@@ -251,7 +273,6 @@ function markdown(div, arg)
         textAlign: "center", fontSize: "1.5em", marginTop: 0, fontWeight: "normal"
     }));
     [].forEach.call(div.getElementsByTagName("li"), e => applyStyle(e, {marginBottom: "0.4em"}));
-
 }
 
 // ------------------------------------------------------------
@@ -286,18 +307,22 @@ var slides = [
     {template: image, title: "Image Slide (courtesy of Unsplash)", url: "https://images.unsplash.com/photo-1414115880398-afebc3d95efc?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600"},
     {template: youtube, title: "YouTube", id: "PUv66718DII"},
     {template: video, title: "MP4", videoSrc: "http://techslides.com/demos/sample-videos/small.mp4", thumbnailSrc: "http://perso.freelug.org/benw/rotor/colour.jpg"},
-    {template: canvas, render: ctx => {
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth=3;
-        ctx.fillStyle = "#ff0";
-        var rect = [-800, -800, 1600, 1600];
-        ctx.fillRect(...rect);
-        ctx.strokeRect(...rect);
-        ctx.fillStyle = "#000";
-        ctx.font = "200px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("Canvas", 0, 0);
+    {template: canvas, animation: true, render: (ctx,t) => {
+        ctx.save();
+            ctx.clearRect(-2000,-2000,4000,4000);
+            ctx.rotate(t);
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth=3;
+            ctx.fillStyle = "#ff0";
+            var rect = [-800, -800, 1600, 1600];
+            ctx.fillRect(...rect);
+            ctx.strokeRect(...rect);
+            ctx.fillStyle = "#000";
+            ctx.font = "200px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("Canvas", 0, 0);
+        ctx.restore();
     }},
     {template: title, title: "Good riddance, Powerpoint!"},
 ]
