@@ -292,6 +292,7 @@ var slides = [
             <li>ES6 — backwards compatibility is boring</li>
             <li>Hackable: Add your own templates, styles and effects</li>
             <li>Everything is code</li>
+            <li><a href="https://github.com/niklasfrykholm/nfslides">On GitHub</a></li>
         </ul>`},
     {h1: "Features", ul: `
         <li>Auto-reload, just save in your text editor</li>
