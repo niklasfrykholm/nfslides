@@ -85,8 +85,9 @@ function render()
     state.canReload = true;
     state.currentSlide = Math.max(0, Math.min(state.currentSlide, slides.length-1));
 
+    const root = e("div", {});
     if (state.view == "list") {
-        const root = e("div", {});
+
         const w = 300 * state.aspectRatio, h = 300;
         let x = 0, y = 0;
         for (let i=0; i<slides.length; ++i) {
@@ -97,9 +98,9 @@ function render()
                 {x=0; y += h + 10;}
             div.onmousedown = () => {state.currentSlide = i; state.view = "slide"; render();};
         }
-        body.appendChild(root);
     } else
-        (slides[state.currentSlide].template || defaultTemplate)(centerDiv(body), slides[state.currentSlide]);
+        (slides[state.currentSlide].template || defaultTemplate)(centerDiv(root), slides[state.currentSlide]);
+    body.appendChild(root);
 
     if (state.showHelp) showHelp(body);
 
@@ -115,7 +116,7 @@ function render()
         if (s == "w")                   state.aspectRatio = state.aspectRatio > 14/9 ? 12/9 : 16/9;
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
-        else if (s == " ")              state.isPlaying = !state.isPlaying;
+        else if (s == " ")              {state.isPlaying = !state.isPlaying; reload();}
         else if (s != "r")              return;
         render();
     }
@@ -249,6 +250,39 @@ function makeSlides(html)
 // Slides
 // ------------------------------------------------------------
 
+function sampleCustomTemplate(div, arg)
+{
+    div.backgroundCOlor = "#000";
+    div.id = "player";
+
+    var b = div.appendChild(e("div", baseStyle, {
+        backgroundImage: `url('${arg.imgB}')`, backgroundSize: `auto ${div.style.height}`,
+        backgroundRepeat: "no-repeat"}));
+    var aw = div.appendChild(e("div", baseStyle, {width: "50%"}));
+    var a = aw.appendChild(e("div", baseStyle, {
+        backgroundImage: `url('${arg.imgA}')`, backgroundSize: `auto ${div.style.height}`,
+        backgroundRepeat: "no-repeat"}));
+
+    b.appendChild( e("div", baseStyle, {fontSize: "1em",
+        top: "1em", left: "-1em", textAlign: "right", text: arg.captionB, color: "#fff",
+        textShadow: "0px 0px 20px #000", overflow: "visible"} ));
+    a.appendChild( e("div", baseStyle, {fontSize: "1em",
+        top: "1em", left: "1em", textAlign: "left", text: arg.captionA, color: "#fff",
+        textShadow: "0px 0px 20px #000", overflow: "visible", width: div.style.width} ));
+
+    if (isPlaying()) {
+        const start = Date.now();
+        const animate = function() {
+            if (document.getElementById("player") != div) return;
+            var split = Math.sin((Date.now() - start)/1000) * 40 + 50;
+            aw.style.width = `${split}%`;
+            window.requestAnimationFrame(animate);
+        };
+        window.requestAnimationFrame(animate);
+        state.canReload = false;
+    }
+}
+
 var slides = [
     {title: "nfslides", subtitle: "Niklas Frykholm, 15 Feb 2016"},
     {html: `
@@ -299,10 +333,17 @@ var slides = [
         * Takes a range of HTML
         * Splits into separate slides at each \`<h1>\`
 
-        # Advantages of makeSlides()
+        # Advantages of *makeSlides*
 
-        * Easier to read
-        * Copy/paste markdown with other programs
+        * Write your slides as a solid block of HTML or Markdown
+        * Easier to read and write
+        * Copy/paste to other programs
     `)),
+    {template: sampleCustomTemplate,
+        captionA: "Use custom templates",
+        captionB: "For special effects",
+        imgA: "https://images.unsplash.com/photo-1414115880398-afebc3d95efc?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600",
+        imgB: "https://images.unsplash.com/photo-1442589031151-61d5645469d7?crop=entropy&dpr=2&fit=crop&fm=jpg&h=900&ixjsv=2.1.0&ixlib=rb-0.3.5&q=50&w=1600"
+    },
     {title: "Good riddance, Powerpoint!", subtitle: "TTYN!"},
 ]
