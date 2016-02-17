@@ -22,10 +22,10 @@ function applyStyle(e, style)
 }
 
 // Create a DOM element with style(s) from arguments.
-function e(tag)
+function e(tag, ...styles)
 {
     const e = document.createElement(tag);
-    [].forEach.call(arguments, style => applyStyle(e, style));
+    styles.forEach(style => applyStyle(e, style));
     return e;
 }
 
@@ -111,7 +111,7 @@ function render()
         render();
     };
     body.onkeypress = function (evt) {
-        const s = String.fromCharCode(evt.keyCode)
+        const s = String.fromCharCode(evt.which || evt.keyCode)
         if (s == "w")                   state.aspectRatio = state.aspectRatio > 14/9 ? 12/9 : 16/9;
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
