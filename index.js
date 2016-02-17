@@ -95,7 +95,7 @@ function render()
             x += w + 10;
             if (x + w + 10 > window.innerWidth)
                 {x=0; y += h + 10;}
-            div.onmousedown = () => {state.currentSlide = i; state.view = "slide";};
+            div.onmousedown = () => {state.currentSlide = i; state.view = "slide"; render();};
         }
         body.appendChild(root);
     } else
