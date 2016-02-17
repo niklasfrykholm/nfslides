@@ -238,6 +238,13 @@ function defaultTemplate(div, arg)
     addElements(div, arg);
 }
 
+function makeSlides(html)
+{
+    return html.split("<h1").slice(1)
+        .map(h => "<h1" + h)
+        .map(h => {return {html: h}});
+}
+
 // ------------------------------------------------------------
 // Slides
 // ------------------------------------------------------------
@@ -257,13 +264,13 @@ var slides = [
         <li>Keyboard interface: press <b>h</b> or <b>?</b> for help</li>
         <li>Toggle between 16:9 and 4:3: press <b>w</b></li>
         <li>Toggle between views: press <b>v</b></li>`},
-    {h1: "Built-In Templates", ul: `
+    {h1: "Built-In Template Functionality", ul: `
         <li>Title</li>
         <li>List</li>
         <li>Markdown</li>
         <li>Image</li>
-        <li>Video (local or youtube)</li>
-        <li>Canvas (2D and 3D graphics)</li>`},
+        <li>Video (local or YouTube)</li>
+        <li>Canvas (with animation)</li>`},
     {markdown: `
         # Markdown
 
@@ -286,5 +293,16 @@ var slides = [
         ctx.restore();
         return "animate";
     }},
-    {title: "Good riddance, Powerpoint!", subtitle: "TTYN"},
+    ...makeSlides(renderMarkdown(`
+        # Using *makeSlides*
+
+        * Takes a range of HTML
+        * Splits into separate slides at each \`<h1>\`
+
+        # Advantages of makeSlides()
+
+        * Easier to read
+        * Copy/paste markdown with other programs
+    `)),
+    {title: "Good riddance, Powerpoint!", subtitle: "TTYN!"},
 ]
