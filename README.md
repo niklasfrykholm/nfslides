@@ -2,7 +2,7 @@
 
 `nfslides` is a minimalistic slideshow program written in JavaScript.
 
-[Check out the sample slideshow!](http://htmlpreview.github.io/?https://rawgit.com/niklasfrykholm/nfslides/master/index.html)!
+[Check out the sample slideshow!](http://htmlpreview.github.io/?https://rawgit.com/niklasfrykholm/nfslides/master/index.html)
 
 ## Getting Started
 
