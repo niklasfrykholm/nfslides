@@ -146,6 +146,24 @@ if (window.location.href.startsWith("file://"))
 
 var baseStyle = {position: "absolute", overflow: "hidden", width: "100%", height: "100%"};
 
+function renderMarkdown(md)
+{
+    const unindent = function(s) {
+        s = s.replace(/^\s*\n/, ""); // Remove initial blank lines
+        const indent = s.match(/^\s*/)[0];
+        const matchIndent = new RegExp(`^${indent}`, "mg");
+        return s.replace(matchIndent, "");
+    };
+
+    if (typeof marked === "undefined") {
+        require("marked.min.js");
+        window.setTimeout(render, 50);
+        return "";
+    }
+
+    return marked(unindent(md));
+}
+
 function addElements(div, arg)
 {
     if (arg.imageUrl)
@@ -201,26 +219,10 @@ function addElements(div, arg)
         c.appendChild( e("ul", {html: arg.ul}) );
         div.appendChild(c);
     }
-    if (arg.markdown) {
-        const unindent = function(s) {
-            s = s.replace(/^\s*\n/, ""); // Remove initial space
-            const indent = s.match(/^\s*/)[0];
-            const matchIndent = new RegExp(`^${indent}`, "mg");
-            s = s.replace(matchIndent, "");
-            return s;
-        };
-
-        if (typeof marked === "undefined") {
-            require("marked.min.js");
-            window.setTimeout(render, 50);
-            return;
-        }
-
-        arg.html = marked(unindent(arg.markdown));
-    }
+    if (arg.markdown)
+        arg.html = renderMarkdown(arg.markdown);
     if (arg.html)
         div.appendChild( e("div", baseStyle, {left: "5%", width: "90%", top: "10%", html: arg.html}) );
-
     if (arg.caption)
         div.appendChild( e("div", baseStyle, {fontSize: "1em",
             top: "90%", textAlign: "center", text: arg.caption, color: "#fff",
