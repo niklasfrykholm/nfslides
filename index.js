@@ -119,7 +119,12 @@ function render()
         else if (s == " ")              {state.isPlaying = !state.isPlaying; reload();}
         else if (s != "r")              return;
         render();
-    }
+    };
+    body.ontouchend = function (evt) {
+        if (evt.changedTouches[0].clientX > (window.innerWidth/2.0)) state.currentSlide++;
+        else state.currentSlide--;
+        render();
+    };
 }
 
 function require(src)
