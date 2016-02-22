@@ -84,10 +84,11 @@ function render()
 
     state.canReload = true;
     state.currentSlide = Math.max(0, Math.min(state.currentSlide, slides.length-1));
+    if (window.orientation !== undefined)
+        state.view = Math.abs(window.orientation) === 90 ? "slide" : "list";
 
     const root = e("div", {});
     if (state.view == "list") {
-
         const w = 300 * state.aspectRatio, h = 300;
         let x = 0, y = 0;
         for (let i=0; i<slides.length; ++i) {
@@ -105,6 +106,7 @@ function render()
     if (state.showHelp) showHelp(body);
 
     body.onresize = render;
+    body.onorientationchange = render;
     body.onkeydown = function (evt) {
         if (evt.keyCode == 37)          state.currentSlide--;
         else if (evt.keyCode == 39)     state.currentSlide++;
