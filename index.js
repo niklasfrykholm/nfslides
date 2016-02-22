@@ -118,7 +118,7 @@ function render()
         if (s == "w")                   state.aspectRatio = state.aspectRatio > 14/9 ? 12/9 : 16/9;
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
-        else if (s == " ")              {state.isPlaying = !state.isPlaying; reload();}
+        else if (s == " ")              {state.isPlaying = !state.isPlaying; render();}
         else if (s != "r")              return;
         render();
     };
