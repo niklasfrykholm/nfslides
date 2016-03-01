@@ -84,10 +84,11 @@ function render()
 
     state.canReload = true;
     state.currentSlide = Math.max(0, Math.min(state.currentSlide, slides.length-1));
+    if (window.orientation !== undefined)
+        state.view = Math.abs(window.orientation) === 90 ? "slide" : "list";
 
     const root = e("div", {});
     if (state.view == "list") {
-
         const w = 300 * state.aspectRatio, h = 300;
         let x = 0, y = 0;
         for (let i=0; i<slides.length; ++i) {
@@ -105,6 +106,7 @@ function render()
     if (state.showHelp) showHelp(body);
 
     body.onresize = render;
+    body.onorientationchange = render;
     body.onkeydown = function (evt) {
         if (evt.keyCode == 37)          state.currentSlide--;
         else if (evt.keyCode == 39)     state.currentSlide++;
@@ -116,7 +118,7 @@ function render()
         if (s == "w")                   state.aspectRatio = state.aspectRatio > 14/9 ? 12/9 : 16/9;
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
-        else if (s == " ")              {state.isPlaying = !state.isPlaying; reload();}
+        else if (s == " ")              {state.isPlaying = !state.isPlaying; render();}
         else if (s == "k")              state.currentSlide--;
         else if (s == "j")              state.currentSlide++;
         else if (s != "r")              return;
@@ -172,6 +174,13 @@ function renderMarkdown(md)
     return marked(unindent(md));
 }
 
+function addPlayButton(div)
+{
+    div.appendChild( e("div", {position: "absolute", width: "100%",
+        text: "►", textAlign: "center",
+        color: "#fff", top: "40%", fontSize: "2em"}) );
+}
+
 function addElements(div, arg)
 {
     if (arg.imageUrl)
@@ -193,6 +202,7 @@ function addElements(div, arg)
                 div.appendChild( e("div", baseStyle, {
                     backgroundImage: `url('${video.thumbnailSrc}')`, backgroundSize: "contain",
                     backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
+            addPlayButton(div);
         }
     }
     if (arg.canvas) {
@@ -202,15 +212,18 @@ function addElements(div, arg)
         const ctx = canvas.getContext("2d");
         ctx.translate(w/2, h/2);
         ctx.scale(h/2000, h/2000);
-        if (arg.canvas(ctx, 0) == "animate" && isPlaying()) {
-            const start = Date.now();
-            const animate = function() {
-                if (document.getElementsByTagName("canvas")[0] != canvas) return;
-                arg.canvas(ctx, (Date.now() - start)/1000.0);
+        if (arg.canvas(ctx, 0) == "animate") {
+            if (isPlaying()) {
+                const start = Date.now();
+                const animate = function() {
+                    if (document.getElementsByTagName("canvas")[0] != canvas) return;
+                    arg.canvas(ctx, (Date.now() - start)/1000.0);
+                    window.requestAnimationFrame(animate);
+                };
                 window.requestAnimationFrame(animate);
-            };
-            window.requestAnimationFrame(animate);
-            state.canReload = false;
+                state.canReload = false;
+            } else
+                addPlayButton(div);
         }
     }
     if (arg.title)
@@ -310,7 +323,8 @@ function sampleCustomTemplate(div, arg)
         };
         window.requestAnimationFrame(animate);
         state.canReload = false;
-    }
+    } else
+        addPlayButton(div);
 }
 
 function setupSlides()
