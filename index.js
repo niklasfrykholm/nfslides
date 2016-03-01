@@ -215,13 +215,13 @@ function addElements(div, arg)
     }
     if (arg.title)
         div.appendChild( e("div", baseStyle, {fontSize: "2em",
-            top: "40%", textAlign: "center", text: arg.title}) );
+            top: "40%", textAlign: "center", html: arg.title}) );
     if (arg.subtitle)
         div.appendChild( e("div", baseStyle, {fontSize: "1em",
-            top: "60%", textAlign: "center", text: arg.subtitle}) );
+            top: "60%", textAlign: "center", html: arg.subtitle}) );
     if (arg.h1)
         div.appendChild( e("div", baseStyle, {fontSize: "1.5em",
-            top: "10%", textAlign: "center", text: arg.h1} ));
+            top: "10%", textAlign: "center", html: arg.h1} ));
     if (arg.ul) {
         const c = e("div", baseStyle, {left: "5%", width: "90%", top: "20%"});
         c.appendChild( e("ul", {html: arg.ul}) );
@@ -233,7 +233,7 @@ function addElements(div, arg)
         div.appendChild( e("div", baseStyle, {left: "5%", width: "90%", top: "10%", html: arg.html}) );
     if (arg.caption)
         div.appendChild( e("div", baseStyle, {fontSize: "1em",
-            top: "90%", textAlign: "center", text: arg.caption, color: "#fff",
+            top: "90%", textAlign: "center", html: arg.caption, color: "#fff",
             textShadow: "0px 0px 20px #000"} ));
 
     [].forEach.call(div.getElementsByTagName("h1"), e => applyStyle(e, {
