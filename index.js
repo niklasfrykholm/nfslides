@@ -165,8 +165,8 @@ function renderMarkdown(md)
 
     if (typeof marked === "undefined") {
         require("marked.min.js");
-        window.setTimeout(render, 50);
-        return "";
+        window.setTimeout(() => {setupSlides(); render();}, 50);
+        return "<h1>Loading Markdown...</h1>";
     }
 
     return marked(unindent(md));
@@ -313,7 +313,9 @@ function sampleCustomTemplate(div, arg)
     }
 }
 
-var slides = [
+function setupSlides()
+{
+    window.slides = [
     {title: "nfslides", subtitle: "Niklas Frykholm, 15 Feb 2016"},
     {html: `
         <h1>nfslides — Minimalistic Slideshows</h1>
@@ -378,3 +380,6 @@ var slides = [
     },
     {title: "Good riddance, Powerpoint!", subtitle: "TTYN!"},
 ]
+}
+
+setupSlides();
