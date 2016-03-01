@@ -244,11 +244,30 @@ function defaultTemplate(div, arg)
     addElements(div, arg);
 }
 
+function autoStyle(div, arg)
+{
+    addElements(div, arg);
+
+    var img = div.getElementsByTagName("img")[0];
+    if (img) {
+        var h1 = div.getElementsByTagName("h1")[0];
+        while (div.lastChild) div.removeChild(div.lastChild);
+        return addElements(div, {imageUrl: img.src, caption: h1.innerHTML});
+    }
+
+    var h2 = div.getElementsByTagName("h2")[0];
+    if (h2) {
+        var h1 = div.getElementsByTagName("h1")[0];
+        while (div.lastChild) div.removeChild(div.lastChild);
+        return addElements(div, {title: h1.innerHTML, subtitle: h2.innerHTML});
+    }
+}
+
 function makeSlides(html)
 {
     return html.split("<h1").slice(1)
         .map(h => "<h1" + h)
-        .map(h => {return {html: h}});
+        .map(h => {return {template: autoStyle, html: h}});
 }
 
 // ------------------------------------------------------------
