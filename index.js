@@ -63,8 +63,8 @@ function render()
         const keyboardShortcuts =
             `<h1>Keyboard Shortcuts</h1>
             <dl>
-                <dt>&lt;Left&gt;</dt>       <dd>: Previous slide</dd>
-                <dt>&lt;Right&gt;</dt>      <dd>: Next slide</dd>
+                <dt>&lt;Left&gt; <span style="color: #fff">or</span> k</dt>       <dd>: Previous slide</dd>
+                <dt>&lt;Right&gt; <span style="color: #fff">or</span> j</dt>      <dd>: Next slide</dd>
                 <dt>&lt;space&gt;</dt>      <dd>: Toggle animations</dd>
                 <dt>w</dt>                  <dd>: Toggle aspect ratio (16:9/3:4)</dd>
                 <dt>v</dt>                  <dd>: Toggle view (slides/list)</dd>
@@ -119,6 +119,8 @@ function render()
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
         else if (s == " ")              {state.isPlaying = !state.isPlaying; render();}
+        else if (s == "k")              state.currentSlide--;
+        else if (s == "j")              state.currentSlide++;
         else if (s != "r")              return;
         render();
     };
@@ -165,8 +167,8 @@ function renderMarkdown(md)
 
     if (typeof marked === "undefined") {
         require("marked.min.js");
-        window.setTimeout(render, 50);
-        return "";
+        window.setTimeout(() => {setupSlides(); render();}, 50);
+        return "<h1>Loading Markdown...</h1>";
     }
 
     return marked(unindent(md));
@@ -226,13 +228,13 @@ function addElements(div, arg)
     }
     if (arg.title)
         div.appendChild( e("div", baseStyle, {fontSize: "2em",
-            top: "40%", textAlign: "center", text: arg.title}) );
+            top: "40%", textAlign: "center", html: arg.title}) );
     if (arg.subtitle)
         div.appendChild( e("div", baseStyle, {fontSize: "1em",
-            top: "60%", textAlign: "center", text: arg.subtitle}) );
+            top: "60%", textAlign: "center", html: arg.subtitle}) );
     if (arg.h1)
         div.appendChild( e("div", baseStyle, {fontSize: "1.5em",
-            top: "10%", textAlign: "center", text: arg.h1} ));
+            top: "10%", textAlign: "center", html: arg.h1} ));
     if (arg.ul) {
         const c = e("div", baseStyle, {left: "5%", width: "90%", top: "20%"});
         c.appendChild( e("ul", {html: arg.ul}) );
@@ -244,7 +246,7 @@ function addElements(div, arg)
         div.appendChild( e("div", baseStyle, {left: "5%", width: "90%", top: "10%", html: arg.html}) );
     if (arg.caption)
         div.appendChild( e("div", baseStyle, {fontSize: "1em",
-            top: "90%", textAlign: "center", text: arg.caption, color: "#fff",
+            top: "90%", textAlign: "center", html: arg.caption, color: "#fff",
             textShadow: "0px 0px 20px #000"} ));
 
     [].forEach.call(div.getElementsByTagName("h1"), e => applyStyle(e, {
@@ -257,11 +259,34 @@ function defaultTemplate(div, arg)
     addElements(div, arg);
 }
 
+function autoStyle(div, arg)
+{
+    addElements(div, arg);
+
+    var img = div.getElementsByTagName("img")[0];
+    if (img) {
+        var h1 = div.getElementsByTagName("h1")[0];
+        while (div.lastChild) div.removeChild(div.lastChild);
+        return addElements(div, {imageUrl: img.src, caption: h1.innerHTML});
+    }
+
+    var h2 = div.getElementsByTagName("h2")[0];
+    if (h2) {
+        var h1 = div.getElementsByTagName("h1")[0];
+        while (div.lastChild) div.removeChild(div.lastChild);
+        return addElements(div, {title: h1.innerHTML, subtitle: h2.innerHTML});
+    }
+
+    var lis = div.getElementsByTagName("li");
+    if (lis)
+        [].forEach.call(lis, li => {li.style.marginTop = "0.4em";});
+}
+
 function makeSlides(html)
 {
     return html.split("<h1").slice(1)
         .map(h => "<h1" + h)
-        .map(h => {return {html: h}});
+        .map(h => {return {template: autoStyle, html: h}});
 }
 
 // ------------------------------------------------------------
@@ -302,7 +327,9 @@ function sampleCustomTemplate(div, arg)
         addPlayButton(div);
 }
 
-var slides = [
+function setupSlides()
+{
+    window.slides = [
     {title: "nfslides", subtitle: "Niklas Frykholm, 15 Feb 2016"},
     {html: `
         <h1>nfslides — Minimalistic Slideshows</h1>
@@ -367,3 +394,6 @@ var slides = [
     },
     {title: "Good riddance, Powerpoint!", subtitle: "TTYN!"},
 ]
+}
+
+setupSlides();
