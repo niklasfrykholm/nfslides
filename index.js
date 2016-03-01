@@ -263,6 +263,10 @@ function autoStyle(div, arg)
         while (div.lastChild) div.removeChild(div.lastChild);
         return addElements(div, {title: h1.innerHTML, subtitle: h2.innerHTML});
     }
+
+    var lis = div.getElementsByTagName("li");
+    if (lis)
+        [].forEach.call(lis, li => {li.style.marginTop = "0.4em";});
 }
 
 function makeSlides(html)
