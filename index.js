@@ -172,6 +172,13 @@ function renderMarkdown(md)
     return marked(unindent(md));
 }
 
+function addPlayButton(div)
+{
+    div.appendChild( e("div", {position: "absolute", width: "100%",
+        text: "►", textAlign: "center",
+        color: "#fff", top: "40%", fontSize: "2em"}) );
+}
+
 function addElements(div, arg)
 {
     if (arg.imageUrl)
@@ -193,6 +200,7 @@ function addElements(div, arg)
                 div.appendChild( e("div", baseStyle, {
                     backgroundImage: `url('${video.thumbnailSrc}')`, backgroundSize: "contain",
                     backgroundPosition: "center", backgroundRepeat: "no-repeat"}));
+            addPlayButton(div);
         }
     }
     if (arg.canvas) {
@@ -202,15 +210,18 @@ function addElements(div, arg)
         const ctx = canvas.getContext("2d");
         ctx.translate(w/2, h/2);
         ctx.scale(h/2000, h/2000);
-        if (arg.canvas(ctx, 0) == "animate" && isPlaying()) {
-            const start = Date.now();
-            const animate = function() {
-                if (document.getElementsByTagName("canvas")[0] != canvas) return;
-                arg.canvas(ctx, (Date.now() - start)/1000.0);
+        if (arg.canvas(ctx, 0) == "animate") {
+            if (isPlaying()) {
+                const start = Date.now();
+                const animate = function() {
+                    if (document.getElementsByTagName("canvas")[0] != canvas) return;
+                    arg.canvas(ctx, (Date.now() - start)/1000.0);
+                    window.requestAnimationFrame(animate);
+                };
                 window.requestAnimationFrame(animate);
-            };
-            window.requestAnimationFrame(animate);
-            state.canReload = false;
+                state.canReload = false;
+            } else
+                addPlayButton(div);
         }
     }
     if (arg.title)
@@ -287,7 +298,8 @@ function sampleCustomTemplate(div, arg)
         };
         window.requestAnimationFrame(animate);
         state.canReload = false;
-    }
+    } else
+        addPlayButton(div);
 }
 
 var slides = [
