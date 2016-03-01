@@ -63,8 +63,8 @@ function render()
         const keyboardShortcuts =
             `<h1>Keyboard Shortcuts</h1>
             <dl>
-                <dt>&lt;Left&gt;</dt>       <dd>: Previous slide</dd>
-                <dt>&lt;Right&gt;</dt>      <dd>: Next slide</dd>
+                <dt>&lt;Left&gt; <span style="color: #fff">or</span> k</dt>       <dd>: Previous slide</dd>
+                <dt>&lt;Right&gt; <span style="color: #fff">or</span> j</dt>      <dd>: Next slide</dd>
                 <dt>&lt;space&gt;</dt>      <dd>: Toggle animations</dd>
                 <dt>w</dt>                  <dd>: Toggle aspect ratio (16:9/3:4)</dd>
                 <dt>v</dt>                  <dd>: Toggle view (slides/list)</dd>
