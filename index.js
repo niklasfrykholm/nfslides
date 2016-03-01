@@ -117,6 +117,8 @@ function render()
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
         else if (s == " ")              {state.isPlaying = !state.isPlaying; reload();}
+        else if (s == "k")              state.currentSlide--;
+        else if (s == "j")              state.currentSlide++;
         else if (s != "r")              return;
         render();
     };
