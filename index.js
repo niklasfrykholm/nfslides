@@ -118,10 +118,11 @@ function render()
         if (s == "w")                   state.aspectRatio = state.aspectRatio > 14/9 ? 12/9 : 16/9;
         else if (s == "v")              state.view = state.view == "list" ? "slide" : "list";
         else if (s == "?" || s == "h")  state.showHelp = !state.showHelp;
-        else if (s == " ")              {state.isPlaying = !state.isPlaying; render();}
+        else if (s == " ")              {state.isPlaying = !state.isPlaying;}
         else if (s == "k")              state.currentSlide--;
         else if (s == "j")              state.currentSlide++;
-        else if (s != "r")              return;
+        else if (s == "r")              {require("index.js"); window.setTimeout(render, 200); return;}
+        else return;
         render();
     };
     body.ontouchend = function (evt) {
