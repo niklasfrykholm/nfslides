@@ -125,9 +125,22 @@ function render()
         else return;
         render();
     };
-    body.ontouchend = function (evt) {
-        if (evt.changedTouches[0].clientX > (window.innerWidth/2.0)) state.currentSlide++;
-        else state.currentSlide--;
+    body.ontouchstart = function(evt) {
+        state.currentTouch = evt;
+        evt.preventDefault();
+    };
+    body.ontouchmove = function(evt) {
+        evt.preventDefault();
+    };
+    body.ontouchend = function(evt) {
+        evt.preventDefault();
+        const touchDiff = state.currentTouch.changedTouches[0].clientX - evt.changedTouches[0].clientX;
+        if (Math.abs(touchDiff) > 50) {
+            touchDiff > 0 ? state.currentSlide++ : state.currentSlide--;
+        } else {
+            if (evt.changedTouches[0].clientX > (window.innerWidth/2.0)) state.currentSlide++;
+            else state.currentSlide--;
+        }
         render();
     };
 }
